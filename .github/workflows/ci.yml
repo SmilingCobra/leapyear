@@ -1,25 +1,35 @@
-runs-on: ubuntu-latest
+name: Go CI
 
-steps:
-  - uses: actions/checkout@v3
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-  - name: Set up Go
-    uses: actions/setup-go@v2
-    with:
-      go-version: '1.18.x'
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-  - name: Cache Go modules
-    uses: actions/cache@v3
-    with:
-      path: |
-        ~/.cache/go-build
-        ~/go/pkg/mod
-      key: $-go-$
-      restore-keys: |
-        $-go-
+    steps:
+      - uses: actions/checkout@v3
 
-  - name: Install dependencies
-    run: go mod tidy
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.18.x'
 
-  - name: Run tests
-    run: go test -v ./...
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Run tests
+        run: go test -v ./...
